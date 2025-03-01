@@ -1,13 +1,15 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/exhaustive-deps */
+
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Web3Auth, Web3AuthOptions } from "@web3auth/modal";
+import { Web3Auth } from "@web3auth/modal";
 import { CHAIN_NAMESPACES } from "@web3auth/base";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import Web3 from "web3";
+import { getBalance, sendTransaction } from "../services/TransactionService"; // Import the service
 
-const clientId = "BIpSjjuBO_i7_SG8qpb1EM32Fblmg6Nr0filq1oNe8mpsrGVxrNisV1Wm6eLcGv4t_5pR4cR5NLgF9q1GHMR9K0";
+const clientId = "BIpSjjuBO_i7_SG8qpb1EM32Fblmg6Nr0filq1oNe8mpsrGVxrNisV1Wm6eLcGv4t_5pR4cR5NLgF9q1GHMR9K0"; // Replace with your actual client ID
 
 const chainConfig = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
@@ -19,11 +21,22 @@ const chainConfig = {
   tickerName: "Ethereum",
 };
 
+interface Transaction {
+  hash: string;
+  to: string;
+  amount: string;
+  timestamp: string;
+}
+
 export default function Login() {
   const [web3Auth, setWeb3Auth] = useState<Web3Auth | null>(null);
   const [provider, setProvider] = useState<any>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [balance, setBalance] = useState<string>("");
+  const [toAddress, setToAddress] = useState<string>("");
+  const [amount, setAmount] = useState<string>("");
+  const [currentAccount, setCurrentAccount] = useState<string>("");
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   useEffect(() => {
     const initWeb3Auth = async () => {
@@ -43,100 +56,143 @@ export default function Login() {
       try {
         await web3AuthInstance.initModal();
 
-        // ✅ Check if provider exists
         if (web3AuthInstance.provider) {
-          console.log("Session found, checking wallet...");
-
-          const web3 = new Web3(web3AuthInstance.provider);
-          const accounts = await web3.eth.getAccounts();
-
-          if (accounts.length > 0) {
-            console.log("Wallet connected:", accounts[0]);
-            setProvider(web3AuthInstance.provider);
-            setIsAuthenticated(true);
-            fetchBalance(web3AuthInstance.provider);
-          } else {
-            // ❌ No accounts = treat as logged out
-            console.warn("No accounts found despite session");
-            setIsAuthenticated(false);
-            setProvider(null);
-          }
-        } else {
-          console.log("No active session found.");
-          setIsAuthenticated(false);
+          handleLogin(web3AuthInstance.provider);
         }
       } catch (error) {
-        console.error("Web3Auth init failed", error);
-        setIsAuthenticated(false);
+        console.error("Web3Auth initialization error:", error);
       }
     };
 
     initWeb3Auth();
   }, []);
 
-  const fetchBalance = async (currentProvider: any) => {
-    const web3 = new Web3(currentProvider);
-    const accounts = await web3.eth.getAccounts();
-    if (accounts.length > 0) {
-      const balanceInWei = await web3.eth.getBalance(accounts[0]);
-      const balanceInEth = web3.utils.fromWei(balanceInWei, "ether");
-      setBalance(balanceInEth);
-    }
-  };
-
-  const handleLogin = async () => {
-    if (!web3Auth) {
-      console.error("Web3Auth not initialized");
-      return;
-    }
-
+  const handleLogin = async (connectedProvider?: any) => {
     try {
-      const connectedProvider = await web3Auth.connect();
-      setProvider(connectedProvider);
-      setIsAuthenticated(true);
+      const connection = connectedProvider || (await web3Auth?.connect());
 
-      await fetchBalance(connectedProvider);
+      if (connection) {
+        const web3 = new Web3(connection);
+        const accounts = await web3.eth.getAccounts();
+        const address = accounts[0];
+
+        setProvider(connection);
+        setIsAuthenticated(true);
+        setCurrentAccount(address);
+
+        const balance = await getBalance(connection, address);
+        setBalance(balance);
+      }
     } catch (error) {
       console.error("Login failed", error);
     }
   };
 
   const handleLogout = async () => {
-    if (!web3Auth) {
-      console.error("Web3Auth not initialized");
-      return;
-    }
-
     try {
-      await web3Auth.logout();
+      await web3Auth?.logout();
       setProvider(null);
       setIsAuthenticated(false);
       setBalance("");
+      setCurrentAccount("");
+      setTransactions([]);
     } catch (error) {
       console.error("Logout failed", error);
     }
   };
 
+  const handleSendTransaction = async () => {
+    if (!provider || !currentAccount) {
+      alert("No wallet connected!");
+      return;
+    }
+
+    try {
+      const receipt = await sendTransaction(provider, currentAccount, toAddress, amount);
+      alert(`Transaction successful: ${receipt.transactionHash}`);
+
+      const newTransaction: Transaction = {
+        hash: receipt.transactionHash,
+        to: toAddress,
+        amount,
+        timestamp: new Date().toLocaleString(),
+      };
+
+      setTransactions((prev) => [newTransaction, ...prev]);
+      const updatedBalance = await getBalance(provider, currentAccount);
+      setBalance(updatedBalance);
+    } catch (error) {
+      console.error("Transaction failed", error);
+      alert("Transaction failed");
+    }
+  };
+
   return (
     <div className="p-5">
-      <h1 className="text-xl font-bold">Web3Auth Demo</h1>
+      <h1 className="text-xl font-bold">Web3Auth with Send ETH & Transaction History</h1>
 
       {isAuthenticated ? (
         <div>
           <p>Connected ✅</p>
+          <p>Account: {currentAccount}</p>
           <p>Balance: {balance} ETH</p>
-          <button
-            className="bg-red-500 text-white px-4 py-2 mt-3"
-            onClick={handleLogout}
-          >
+
+          {/* Send ETH Form */}
+          <div className="mt-5">
+            <h2 className="text-lg font-semibold">Send ETH</h2>
+            <input
+              type="text"
+              placeholder="Recipient Address"
+              value={toAddress}
+              onChange={(e) => setToAddress(e.target.value)}
+              className="border text-black p-2 w-full mt-2"
+            />
+            <input
+              type="text"
+              placeholder="Amount in ETH"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              className="border text-black p-2 w-full mt-2"
+            />
+            <button
+              className="bg-blue-500 text-black px-4 py-2 mt-3"
+              onClick={handleSendTransaction}
+            >
+              Send Transaction
+            </button>
+          </div>
+
+          {/* Transaction History Table */}
+          <div className="mt-5">
+            <h2 className="text-lg font-semibold">Transaction History</h2>
+            <table className="w-full mt-2 border-collapse border border-gray-300">
+              <thead>
+                <tr className="bg-gray-100 text-black">
+                  <th className="border border-gray-300 p-2">Hash</th>
+                  <th className="border border-gray-300 p-2">To</th>
+                  <th className="border border-gray-300 p-2">Amount (ETH)</th>
+                  <th className="border border-gray-300 p-2">Date/Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {transactions.map((tx, index) => (
+                  <tr key={index}>
+                    <td className="border border-gray-300 p-2">{tx.hash.slice(0, 10)}...</td>
+                    <td className="border border-gray-300 p-2">{tx.to}</td>
+                    <td className="border border-gray-300 p-2">{tx.amount}</td>
+                    <td className="border border-gray-300 p-2">{tx.timestamp}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <button className="bg-red-500 text-white px-4 py-2 mt-5" onClick={handleLogout}>
             Logout
           </button>
         </div>
       ) : (
-        <button
-          className="bg-green-500 text-white px-4 py-2 mt-3"
-          onClick={handleLogin}
-        >
+        <button className="bg-green-500 text-white px-4 py-2 mt-3" onClick={() => handleLogin()}>
           Login with Web3Auth
         </button>
       )}
