@@ -1,5 +1,5 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -7,7 +7,7 @@ import { Web3Auth } from "@web3auth/modal";
 import { CHAIN_NAMESPACES } from "@web3auth/base";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import Web3 from "web3";
-import { getBalance, sendTransaction } from "../services/TransactionService"; // Import the service
+import { getBalance, sendTransaction } from "../services/TransactionService"; // Import service functions
 
 const clientId = "BIpSjjuBO_i7_SG8qpb1EM32Fblmg6Nr0filq1oNe8mpsrGVxrNisV1Wm6eLcGv4t_5pR4cR5NLgF9q1GHMR9K0"; // Replace with your actual client ID
 
@@ -31,8 +31,9 @@ interface Transaction {
 export default function Login() {
   const [web3Auth, setWeb3Auth] = useState<Web3Auth | null>(null);
   const [provider, setProvider] = useState<any>(null);
+  const [web3, setWeb3] = useState<Web3 | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [balance, setBalance] = useState<string>("");
+  const [balance, setBalance] = useState<string>("0");
   const [toAddress, setToAddress] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
   const [currentAccount, setCurrentAccount] = useState<string>("");
@@ -55,9 +56,8 @@ export default function Login() {
 
       try {
         await web3AuthInstance.initModal();
-
         if (web3AuthInstance.provider) {
-          handleLogin(web3AuthInstance.provider);
+          await handleLogin(web3AuthInstance.provider);
         }
       } catch (error) {
         console.error("Web3Auth initialization error:", error);
@@ -70,21 +70,29 @@ export default function Login() {
   const handleLogin = async (connectedProvider?: any) => {
     try {
       const connection = connectedProvider || (await web3Auth?.connect());
-
-      if (connection) {
-        const web3 = new Web3(connection);
-        const accounts = await web3.eth.getAccounts();
-        const address = accounts[0];
-
-        setProvider(connection);
-        setIsAuthenticated(true);
-        setCurrentAccount(address);
-
-        const balance = await getBalance(connection, address);
-        setBalance(balance);
+      if (!connection) {
+        console.error("No provider found during login.");
+        return;
       }
+
+      const web3Instance = new Web3(connection);
+      setWeb3(web3Instance);
+
+      const accounts = await web3Instance.eth.getAccounts();
+      if (accounts.length === 0) {
+        console.error("No accounts found.");
+        return;
+      }
+
+      const address = accounts[0];
+      setProvider(connection);
+      setIsAuthenticated(true);
+      setCurrentAccount(address);
+
+      const balance = await getBalance(connection, address);
+      setBalance(balance);
     } catch (error) {
-      console.error("Login failed", error);
+      console.error("Login failed:", error);
     }
   };
 
@@ -92,12 +100,13 @@ export default function Login() {
     try {
       await web3Auth?.logout();
       setProvider(null);
+      setWeb3(null);
       setIsAuthenticated(false);
-      setBalance("");
+      setBalance("0");
       setCurrentAccount("");
       setTransactions([]);
     } catch (error) {
-      console.error("Logout failed", error);
+      console.error("Logout failed:", error);
     }
   };
 
@@ -119,17 +128,18 @@ export default function Login() {
       };
 
       setTransactions((prev) => [newTransaction, ...prev]);
+
       const updatedBalance = await getBalance(provider, currentAccount);
       setBalance(updatedBalance);
     } catch (error) {
-      console.error("Transaction failed", error);
+      console.error("Transaction failed:", error);
       alert("Transaction failed");
     }
   };
 
   return (
     <div className="p-5">
-      <h1 className="text-xl font-bold">Web3Auth with Send ETH & Transaction History</h1>
+      <h1 className="text-xl font-bold">Web3Auth - Send ETH & Transaction History</h1>
 
       {isAuthenticated ? (
         <div>
@@ -162,7 +172,7 @@ export default function Login() {
             </button>
           </div>
 
-          {/* Transaction History Table */}
+          {/* Transaction History */}
           <div className="mt-5">
             <h2 className="text-lg font-semibold">Transaction History</h2>
             <table className="w-full mt-2 border-collapse border border-gray-300">
