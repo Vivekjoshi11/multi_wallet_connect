@@ -1,5 +1,5 @@
 
-/* eslint-disable react-hooks/exhaustive-deps */
+
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -7,7 +7,7 @@ import { Web3Auth } from "@web3auth/modal";
 import { CHAIN_NAMESPACES } from "@web3auth/base";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import Web3 from "web3";
-import { getBalance, sendTransaction } from "../services/TransactionService"; // Import service functions
+import { getBalance, sendTransaction } from "../services/TransactionService"; // Import your existing service functions
 
 const clientId = "BIpSjjuBO_i7_SG8qpb1EM32Fblmg6Nr0filq1oNe8mpsrGVxrNisV1Wm6eLcGv4t_5pR4cR5NLgF9q1GHMR9K0"; // Replace with your actual client ID
 
@@ -38,38 +38,50 @@ export default function Login() {
   const [amount, setAmount] = useState<string>("");
   const [currentAccount, setCurrentAccount] = useState<string>("");
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loginMethod, setLoginMethod] = useState<"web3auth" | "metamask" | null>(null);
 
   useEffect(() => {
+    
     const initWeb3Auth = async () => {
       const privateKeyProvider = new EthereumPrivateKeyProvider({
-        config: { chainConfig },
+          config: { chainConfig },
       });
-
+  
       const web3AuthInstance = new Web3Auth({
-        clientId,
-        chainConfig,
-        web3AuthNetwork: "sapphire_devnet",
-        privateKeyProvider,
+          clientId,
+          chainConfig,
+          web3AuthNetwork: "sapphire_devnet",
+          privateKeyProvider,
       });
-
+  
       setWeb3Auth(web3AuthInstance);
-
+  
       try {
-        await web3AuthInstance.initModal();
-        if (web3AuthInstance.provider) {
-          await handleLogin(web3AuthInstance.provider);
-        }
+          await web3AuthInstance.initModal();
+          if (web3AuthInstance.provider) {
+              const web3Instance = new Web3(web3AuthInstance.provider);
+              const accounts = await web3Instance.eth.getAccounts();
+              if (accounts.length > 0) {
+                  await handleLogin(web3AuthInstance.provider, "web3auth");
+              } else {
+                  console.warn("Web3Auth provider is available, but no accounts found. User might need to log in again.");
+              }
+          }
       } catch (error) {
-        console.error("Web3Auth initialization error:", error);
+          console.error("Web3Auth initialization error:", error);
       }
-    };
-
+  };
+  
     initWeb3Auth();
   }, []);
 
-  const handleLogin = async (connectedProvider?: any) => {
+  const handleLogin = async (connectedProvider?: any, method: "web3auth" | "metamask" = "web3auth") => {
     try {
-      const connection = connectedProvider || (await web3Auth?.connect());
+      let connection = connectedProvider;
+      if (!connection) {
+        connection = await web3Auth?.connect();
+      }
+
       if (!connection) {
         console.error("No provider found during login.");
         return;
@@ -88,6 +100,7 @@ export default function Login() {
       setProvider(connection);
       setIsAuthenticated(true);
       setCurrentAccount(address);
+      setLoginMethod(method);
 
       const balance = await getBalance(connection, address);
       setBalance(balance);
@@ -96,18 +109,27 @@ export default function Login() {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await web3Auth?.logout();
-      setProvider(null);
-      setWeb3(null);
-      setIsAuthenticated(false);
-      setBalance("0");
-      setCurrentAccount("");
-      setTransactions([]);
-    } catch (error) {
-      console.error("Logout failed:", error);
+  const handleMetaMaskLogin = async () => {
+    if ((window as any).ethereum) {
+      const provider = (window as any).ethereum;
+      await provider.request({ method: "eth_requestAccounts" });
+      await handleLogin(provider, "metamask");
+    } else {
+      alert("MetaMask is not installed.");
     }
+  };
+
+  const handleLogout = async () => {
+    if (loginMethod === "web3auth") {
+      await web3Auth?.logout();
+    }
+    setProvider(null);
+    setWeb3(null);
+    setIsAuthenticated(false);
+    setBalance("0");
+    setCurrentAccount("");
+    setTransactions([]);
+    setLoginMethod(null);
   };
 
   const handleSendTransaction = async () => {
@@ -139,7 +161,7 @@ export default function Login() {
 
   return (
     <div className="p-5">
-      <h1 className="text-xl font-bold">Web3Auth - Send ETH & Transaction History</h1>
+      <h1 className="text-xl font-bold">Web3Auth + MetaMask - Send ETH & Transaction History</h1>
 
       {isAuthenticated ? (
         <div>
@@ -202,10 +224,16 @@ export default function Login() {
           </button>
         </div>
       ) : (
-        <button className="bg-green-500 text-white px-4 py-2 mt-3" onClick={() => handleLogin()}>
-          Login with Web3Auth
-        </button>
+        <div className="flex gap-3">
+          <button className="bg-green-500 text-white px-4 py-2 mt-3" onClick={() => handleLogin()}>
+            Login with Web3Auth
+          </button>
+          <button className="bg-orange-500 text-white px-4 py-2 mt-3" onClick={handleMetaMaskLogin}>
+            Login with MetaMask
+          </button>
+        </div>
       )}
     </div>
   );
 }
+
