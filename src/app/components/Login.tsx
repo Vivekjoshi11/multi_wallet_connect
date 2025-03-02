@@ -224,12 +224,12 @@ export default function Login() {
           </button>
         </div>
       ) : (
-        <div className="flex gap-3">
+        <div className="flex gap-3 justify-between">
           <button className="bg-green-500 text-white px-4 py-2 mt-3" onClick={() => handleLogin()}>
             Login with Web3Auth
           </button>
           <button className="bg-orange-500 text-white px-4 py-2 mt-3" onClick={handleMetaMaskLogin}>
-            Login with MetaMask
+            Connect to wallet (MetaMask)
           </button>
         </div>
       )}
