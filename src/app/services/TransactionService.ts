@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Web3 from "web3";
 
 export const getBalance = async (provider: any, address: string) => {
