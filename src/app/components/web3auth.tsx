@@ -69,7 +69,7 @@ export default function Web3AuthComponent() {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen">
+    <div className="flex flex-col items-center justify-center h-screen">
       <h1>Wellcome to Multiwallet connect app</h1>
       <button
         onClick={handleLogin}
