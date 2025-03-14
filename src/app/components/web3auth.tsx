@@ -70,7 +70,7 @@ export default function Web3AuthComponent() {
 
   return (
     <div className="flex flex-col items-center justify-center h-screen">
-      <h1>Wellcome to Multiwallet connect app</h1>
+      <h6 className="text-2xl">Wellcome to Multiwallet connect app</h6>
       <button
         onClick={handleLogin}
         className="bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-blue-600 transition duration-300"
