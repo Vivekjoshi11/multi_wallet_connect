@@ -45,5 +45,3 @@ here user will have options to use any of this wallte Solana or EVM
 
 here user will have transaction history and all the transactions will be minted
 ![alt text](image-5.png)
-
-![alt text](image.png)
