@@ -28,7 +28,7 @@ export default function Dashboard() {
                         className={`w-40 py-2 font-medium ${selectedTab === "ethereum" ? "bg-white text-black" : "bg-gray-900 text-gray-400"}`}
                         onClick={() => setSelectedTab("ethereum")}
                     >
-                        Ethereum
+                        EVM
                     </button>
                 </div>
 
