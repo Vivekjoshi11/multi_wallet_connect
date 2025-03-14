@@ -35,4 +35,39 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
-![alt text](image.png)
+User Flow Diagram
+![alt text](image-6.png)
+
+Landing Page
+➡️ User sees the navbar with "Connect Wallet" and "Logout" buttons.
+
+![alt text](image-1.png)
+Login with Web3Auth
+➡️ User clicks "Connect Wallet" → Opens Web3Auth popup.
+
+➡️ User chooses login provider (Google, Twitter, etc.).
+
+➡️ Web3Auth creates a session. then it will redirect to dashboard
+
+![alt text](image-2.png)
+Wallet Selection
+➡️ After login, user sees two options:
+
+Connect Solana Wallet (Web3Auth or Phantom)
+Connect EVM Wallet (Web3Auth or MetaMask)
+➡️ User connects one or both wallets.
+
+![alt text](image-3.png)
+![alt text](image-4.png)
+Transaction
+➡️ User initiates a transaction on the connected wallet.
+
+➡️ If successful:
+
+✅ Transaction is mined and added to the blockchain.
+
+➡️ If failed:
+❌ Error message is shown.
+![alt text](image-5.png)
+Transaction History
+➡️ User can view transaction history for both Solana and EVM.

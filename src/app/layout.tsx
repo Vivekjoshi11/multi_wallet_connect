@@ -23,7 +23,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" bbai-tooltip-injected="true">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
