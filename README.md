@@ -34,5 +34,16 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+login page user can login with web3auth
+![alt text](image-1.png)
+user will logedin using web3auth then it will redirect to dashboard
+![alt text](image-2.png)
+
+here user will have options to use any of this wallte Solana or EVM
+![alt text](image-3.png)
+![alt text](image-4.png)
+
+here user will have transaction history and all the transactions will be minted
+![alt text](image-5.png)
 
 ![alt text](image.png)
