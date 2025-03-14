@@ -35,27 +35,8 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
+![alt text](image-6.png)
 
-[ Start ] --> [ User logs in using Web3Auth ] 
-               |
-               v
-   [ Dashboard with options: ]
-        |                   |
-        v                   v
-[ Connect Solana ]     [ Connect EVM ]
-        |                   |
-        v                   v
-[ Solana Wallet Connected ] [ EVM Wallet Connected ]
-        |                   |
-        v                   v
-[ Send Transaction ]     [ Send Transaction ]
-        |                   |
-        v                   v
-[ Transaction Mined ]   [ Transaction Mined ]
-        |                   |
-        v                   v
-[ View Transaction History ]<--------------|
-            
 Landing Page
 ➡️ User sees the navbar with "Connect Wallet" and "Logout" buttons.
 
