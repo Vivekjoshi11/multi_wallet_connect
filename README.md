@@ -34,14 +34,50 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-login page user can login with web3auth
-![alt text](image-1.png)
-user will logedin using web3auth then it will redirect to dashboard
-![alt text](image-2.png)
 
-here user will have options to use any of this wallte Solana or EVM
+
+[ Start ] --> [ User logs in using Web3Auth ] 
+               |
+               v
+   [ Dashboard with options: ]
+        |                   |
+        v                   v
+[ Connect Solana ]     [ Connect EVM ]
+        |                   |
+        v                   v
+[ Solana Wallet Connected ] [ EVM Wallet Connected ]
+        |                   |
+        v                   v
+[ Send Transaction ]     [ Send Transaction ]
+        |                   |
+        v                   v
+[ Transaction Mined ]   [ Transaction Mined ]
+        |                   |
+        v                   v
+[ View Transaction History ]<--------------|
+            
+Landing Page
+➡️ User sees the navbar with "Connect Wallet" and "Logout" buttons.
+![alt text](image-1.png)
+Login with Web3Auth
+➡️ User clicks "Connect Wallet" → Opens Web3Auth popup.
+➡️ User chooses login provider (Google, Twitter, etc.).
+➡️ Web3Auth creates a session. then it will redirect to dashboard
+![alt text](image-2.png)
+Wallet Selection
+➡️ After login, user sees two options:
+
+Connect Solana Wallet (Web3Auth or Phantom)
+Connect EVM Wallet (Web3Auth or MetaMask)
+➡️ User connects one or both wallets.
 ![alt text](image-3.png)
 ![alt text](image-4.png)
-
-here user will have transaction history and all the transactions will be minted
+Transaction
+➡️ User initiates a transaction on the connected wallet.
+➡️ If successful:
+✅ Transaction is mined and added to the blockchain.
+➡️ If failed:
+❌ Error message is shown.
 ![alt text](image-5.png)
+Transaction History
+➡️ User can view transaction history for both Solana and EVM.
