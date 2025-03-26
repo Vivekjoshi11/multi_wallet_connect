@@ -196,10 +196,6 @@ export default function Web3AuthSolanaComponent() {
       setSolanaWallet(null);
       setTransactionSig(null);
       setConnection(null);
-      // Don't clear transaction history on logout to persist it
-      // Optionally clear localStorage if you want to reset on logout:
-      // localStorage.removeItem('transactionHistory');
-      // setTransactionHistory([]);
     } catch (error) {
       console.error("Logout failed:", error);
       setErrorMessage("Logout failed. Please try again.");
