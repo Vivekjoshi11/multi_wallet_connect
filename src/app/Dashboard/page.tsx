@@ -43,7 +43,7 @@ export default function Dashboard() {
             <div className="p-6">
             <h2 className="text-xl font-bold">About Native Wallet Integration</h2>
             <div className="mt-4 space-y-4">
-                <h1>Taks</h1>
+                <h1>Tasks</h1>
                 <p>1. PoC NextJS app where web3auth is used to control two different wallets for the same logged-in user, one for Solana and the other for any EVM chain. Make sure the transactions are going out and are mined. </p>
                 <p>2. Is it possible to enable web3auth to support native wallets, such as MetaMask for EVM chains and Phantom for Solana?</p>
                 <p>3. Suppose that the user uses native wallet integration in our web app. Would we get their wallet address in our app as it is visible in MM/Phantom, or is w3a still generating another wallet for that user? Is their native wallet used only for authentication into w3a?</p>
